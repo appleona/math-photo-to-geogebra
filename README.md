@@ -97,7 +97,21 @@ python scripts/pack_ggb.py output.ggb -i input.xml
 
 ### 第三步：打开课件
 
-双击生成的 `.ggb` 文件，用 **GeoGebra Classic 6**（免费软件）打开。
+**方式一（推荐）：网页版 —— 无需安装**
+
+1. 打开 [https://www.geogebra.org/classic](https://www.geogebra.org/classic)
+2. 点击左上角 **📁 打开** → **浏览**
+3. 选择生成的 `.ggb` 文件，即可在浏览器中直接使用
+
+> ✅ 零安装，手机/平板/电脑都能用
+> ✅ 打开即用，孩子随时可学
+
+**方式二：桌面版 —— 功能更完整**
+
+下载安装 **GeoGebra Classic 6**（免费）：
+[https://www.geogebra.org/download](https://www.geogebra.org/download)
+
+双击 `.ggb` 文件即可打开。
 
 ### 第四步：动手探索
 
