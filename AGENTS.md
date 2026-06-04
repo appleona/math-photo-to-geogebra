@@ -12,7 +12,7 @@
 Use this skill when the user wants to:
 1. Convert photographed math problems to GeoGebra diagrams
 2. Create interactive geometry figures from text descriptions
-3. Generate .ggb files with OCR text and original images
+3. Generate .ggb files with OCR text and dynamic demonstrations
 4. Handle plane geometry or coordinate function problems (grades 7-9)
 
 ## Key Capabilities
