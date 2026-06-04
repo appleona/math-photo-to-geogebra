@@ -101,7 +101,7 @@ Verify (use references/quality-check.md)
 4. **common-patterns.md** - Common geometry constructions
 5. **xml-cheatsheet.md** - Quick XML syntax reference
 6. **quality-check.md** - Verification checklist
-7. **image-embedding.md** - Image embedding guide
+7. **image-embedding.md** - Image embedding limitations & alternatives (text preferred)
 
 ## Common Mistakes to Avoid
 
