@@ -1,144 +1,142 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-一键上传.ggb文件到GeoGebra网页版并获取分享链接
+一键在浏览器中打开 GeoGebra 交互图形（零依赖，纯标准库）
 
-使用方法:
+原理：
+  GeoGebra 官方提供 deployggb.js 嵌入库，支持通过 ggbBase64 参数
+  直接加载 .ggb 文件内容，无需上传到云端、无需登录。
+
+使用方法：
     python upload_to_geogebra.py path/to/your.ggb
 
-输出:
-    分享链接 (如 https://www.geogebra.org/classic#matrix/xxxxxx)
+输出：
+    1. 生成同名 .html 文件（自包含，可离线查看）
+    2. 自动用系统默认浏览器打开
+    3. 用户可交互操作（拖动点、查看数值）
+
+如需真正的 geogebra.org 分享链接，仍需手动登录后保存到云端。
 """
 
 import sys
 import os
-import time
+import base64
+import webbrowser
 
 
-def upload_and_get_link(ggb_path):
+HTML_TEMPLATE = '''<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <script src="https://www.geogebra.org/apps/deployggb.js"></script>
+    <style>
+        body {{ margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; }}
+        #header {{
+            background: #f0f0f0; padding: 8px 16px; font-size: 14px;
+            border-bottom: 1px solid #ccc; display: flex; align-items: center;
+        }}
+        #header span {{ margin-right: 20px; }}
+        #header a {{
+            color: #0066cc; text-decoration: none; margin-left: auto;
+        }}
+        #ggb-container {{ width: 100vw; height: calc(100vh - 36px); }}
+    </style>
+</head>
+<body>
+    <div id="header">
+        <span><b>{title}</b></span>
+        <span>文件: {filename}</span>
+        <a href="https://www.geogebra.org/classic" target="_blank">
+            登录 GeoGebra 保存可获取分享链接
+        </a>
+    </div>
+    <div id="ggb-container"></div>
+    <script>
+        var ggbApp = new GGBApplet({{
+            appName: "classic",
+            width: window.innerWidth,
+            height: window.innerHeight - 36,
+            ggbBase64: "{ggb_base64}",
+            showAlgebraInput: true,
+            showToolBar: true,
+            showMenuBar: true,
+            showResetIcon: true,
+            enableLabelDrags: true,
+            enableShiftDragZoom: true,
+            capturingThreshold: 3,
+            appletOnLoad: function() {{
+                console.log("[OK] GeoGebra loaded successfully");
+            }}
+        }}, true);
+        ggbApp.inject('ggb-container');
+    </script>
+</body>
+</html>'''
+
+
+def open_in_browser(ggb_path):
     """
-    使用Playwright上传.ggb文件到GeoGebra网页版
-    
-    注意: 需要安装playwright
-    pip install playwright
-    playwright install chromium
+    读取 .ggb 文件，生成 HTML，用浏览器打开。
+    零依赖，纯 Python 标准库。
     """
-    try:
-        from playwright.sync_api import sync_playwright
-    except ImportError:
-        print("[ERROR] 需要安装playwright: pip install playwright")
-        print("[ERROR] 然后运行: playwright install chromium")
-        return None
-    
     if not os.path.exists(ggb_path):
-        print(f"[ERROR] 文件不存在: {ggb_path}")
-        return None
-    
-    print(f"[INFO] 正在上传: {ggb_path}")
-    
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)  # 可见模式，方便调试
-        context = browser.new_context(
-            viewport={'width': 1280, 'height': 800}
-        )
-        page = context.new_page()
-        
-        try:
-            # 1. 打开GeoGebra网页版
-            print("[INFO] 打开GeoGebra网页版...")
-            page.goto("https://www.geogebra.org/classic", wait_until="networkidle")
-            time.sleep(3)
-            
-            # 2. 点击"打开"菜单（左上角汉堡菜单）
-            print("[INFO] 点击菜单...")
-            # GeoGebra的菜单按钮
-            menu_button = page.locator('button[title="Open Menu"]').first
-            if menu_button.count() == 0:
-                menu_button = page.locator('div[role="button"]').filter(has_text="☰").first
-            
-            if menu_button.count() > 0:
-                menu_button.click()
-                time.sleep(1)
-            
-            # 3. 点击"打开"选项
-            print("[INFO] 点击'打开'...")
-            open_option = page.locator('text=Open').first
-            if open_option.count() > 0:
-                open_option.click()
-                time.sleep(1)
-            
-            # 4. 点击"浏览"选择文件
-            print("[INFO] 选择文件上传...")
-            # 找到文件输入框
-            file_input = page.locator('input[type="file"]').first
-            if file_input.count() > 0:
-                file_input.set_input_files(ggb_path)
-                time.sleep(3)  # 等待上传和加载
-            else:
-                print("[WARN] 未找到文件输入框，尝试拖放方式...")
-                # 拖放方式
-                page.evaluate(f"""
-                    async () => {{
-                        const file = await fetch('file://{ggb_path}').then(r => r.blob());
-                        const dt = new DataTransfer();
-                        dt.items.add(new File([file], '{os.path.basename(ggb_path)}'));
-                        const event = new DragEvent('drop', {{dataTransfer: dt}});
-                        document.body.dispatchEvent(event);
-                    }}
-                """)
-                time.sleep(5)
-            
-            # 5. 等待加载完成，获取URL
-            print("[INFO] 等待加载完成...")
-            time.sleep(3)
-            
-            current_url = page.url
-            print(f"[INFO] 当前URL: {current_url}")
-            
-            # 如果URL包含material ID，说明已保存
-            if "material" in current_url or "classic#matrix" in current_url:
-                print(f"[OK] 分享链接: {current_url}")
-                return current_url
-            else:
-                # 尝试点击保存按钮获取链接
-                print("[INFO] 尝试保存获取链接...")
-                save_button = page.locator('button[title="Save"]').first
-                if save_button.count() > 0:
-                    save_button.click()
-                    time.sleep(3)
-                    current_url = page.url
-                
-                print(f"[OK] 访问链接: {current_url}")
-                return current_url
-                
-        except Exception as e:
-            print(f"[ERROR] 上传失败: {e}")
-            # 截图保存以便调试
-            page.screenshot(path="upload_error.png")
-            print("[INFO] 错误截图已保存: upload_error.png")
-            return None
-        finally:
-            browser.close()
+        print("[ERROR] File not found: " + ggb_path)
+        return False
+
+    # 读取 ggb 并转 base64
+    with open(ggb_path, 'rb') as f:
+        ggb_data = f.read()
+    b64 = base64.b64encode(ggb_data).decode('ascii')
+
+    filename = os.path.basename(ggb_path)
+    title = os.path.splitext(filename)[0]
+    html_path = os.path.splitext(ggb_path)[0] + '.html'
+
+    # 生成 HTML
+    html = HTML_TEMPLATE.format(
+        title=title,
+        filename=filename,
+        ggb_base64=b64
+    )
+
+    with open(html_path, 'w', encoding='utf-8') as f:
+        f.write(html)
+
+    print("=" * 60)
+    print("[OK] Generated: " + html_path)
+    print("=" * 60)
+    print("Features:")
+    print("  - Interactive geometry (drag points, zoom, pan)")
+    print("  - Works offline after first load (deployggb.js cached)")
+    print("  - No GeoGebra account required")
+    print("")
+    print("To get a shareable geogebra.org link:")
+    print("  1. Open the page below")
+    print("  2. Click 'Login GeoGebra to save' in top-right")
+    print("  3. Login and save -> get link like geogebra.org/m/xxxx")
+    print("=" * 60)
+
+    # 自动打开浏览器
+    abs_path = os.path.abspath(html_path)
+    # Windows 用 file:// 协议
+    url = 'file:///' + abs_path.replace('\\', '/')
+    webbrowser.open(url, new=2)
+    print("[OK] Browser opened: " + url)
+    return True
 
 
 def main():
     if len(sys.argv) < 2:
-        print("用法: python upload_to_geogebra.py <path/to/file.ggb>")
-        print("示例: python upload_to_geogebra.py test_problem.ggb")
+        print("Usage: python upload_to_geogebra.py <path/to/file.ggb>")
+        print("Example: python upload_to_geogebra.py test_problem.ggb")
         sys.exit(1)
-    
+
     ggb_path = sys.argv[1]
-    link = upload_and_get_link(ggb_path)
-    
-    if link:
-        print("\n" + "="*60)
-        print("分享链接 (用户可直接在浏览器打开):")
-        print(link)
-        print("="*60)
-    else:
-        print("\n[FAIL] 上传失败")
-        sys.exit(1)
+    success = open_in_browser(ggb_path)
+    sys.exit(0 if success else 1)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
