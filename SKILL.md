@@ -1,5 +1,6 @@
 ---
 name: math-photo-to-geogebra
+version: "1.1.0"
 description: 将简体中文数学题（七到九年级平面几何、直角坐标系函数）转换为GeoGebra交互图形，支持OCR文本显示和动态演示。Use when users need to (1) Convert math problem images to GeoGebra diagrams, (2) Recreate geometric figures with proper constraints, (3) Generate .ggb files with OCR text and dynamic sliders.
 ---
 
