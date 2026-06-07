@@ -1,20 +1,10 @@
-# Ignore everything except math-photo-to-geogebra skill
-/*
-!math-photo-to-geogebra/
-!math-photo-to-geogebra/**/
-!.gitignore
-
 # Ignore temporary and test files
 *.ggb
 *.xml
-*.py
 *.ps1
 *.bat
 *.txt
 *.log
-*.md
-msi_extract/
-.playwright-mcp/
 err*
 output*
 result*
@@ -28,7 +18,13 @@ test_*
 demo_*
 minimal_test*
 unnamed*
+msi_extract/
+.playwright-mcp/
 
-# But keep the skill directory
-!math-photo-to-geogebra/**/*.md
-!math-photo-to-geogebra/**/*.py
+# Keep skill files
+!scripts/
+!scripts/**/*.py
+!references/
+!references/**/*.md
+!*.md
+!.gitignore

@@ -38,17 +38,23 @@ image_utils.py       # Process images
 ## Workflow
 
 ```
-User Input
+User Input (image or text)
     ↓
 Analyze Problem (use references/problem-analysis-guide.md)
     ↓
+Check Original Image Direction (保持方向一致)
+    ↓
 Determine Dynamic Approach (use references/dynamic-demo-patterns.md)
     ↓
-Generate XML (use references/xml-cheatsheet.md)
+Generate XML with Proper Text Spacing (间距≥1.5)
     ↓
 Pack to .ggb (use scripts/pack_ggb.py)
     ↓
+Upload to GeoGebra Web (optional, use scripts/upload_to_geogebra.py)
+    ↓
 Verify (use references/quality-check.md)
+    ↓
+Share Link to User
 ```
 
 ## Golden Rules

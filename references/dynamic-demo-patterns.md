@@ -14,6 +14,95 @@
 
 ---
 
+## 模式0：文本布局与间距规范
+
+### 0.1 文本框间距标准
+
+**核心原则：相邻文本框 y 坐标差 ≥ 1.5，分组间距 ≥ 2**
+
+```xml
+<!-- ====== 正确示例：间距充足 ====== -->
+
+<!-- 题目第一行 -->
+<command name="Text">
+    <input a0="&quot;【题目】在平面直角坐标系xOy中...&quot;"/>
+    <input a1="(-12, 9)"/>       <!-- y=9 -->
+    <output a0="line1"/>
+</command>
+<element type="text" label="line1"><show object="true" label="false"/><fontSize val="11"/></element>
+
+<!-- 题目第二行（间距2） -->
+<command name="Text">
+    <input a0="&quot;一次函数y=kx+b(k≠0)的图象经过点(4,1)和(0,-1)。&quot;"/>
+    <input a1="(-12, 7)"/>       <!-- y=7，与上行差2 -->
+    <output a0="line2"/>
+</command>
+<element type="text" label="line2"><show object="true" label="false"/><fontSize val="11"/></element>
+
+<!-- 答案（与题目间距2） -->
+<command name="Text">
+    <input a0="&quot;【答案】y = 0.5x - 1&quot;"/>
+    <input a1="(-12, 5)"/>       <!-- y=5，与上行差2 -->
+    <output a0="answer"/>
+</command>
+<element type="text" label="answer"><show object="true" label="false"/><objColor r="255" g="0" b="0"/><fontSize val="13"/></element>
+
+<!-- 分析提示（与答案间距2） -->
+<command name="Text">
+    <input a0="&quot;【提示】拖动滑块改变m值观察变化&quot;"/>
+    <input a1="(-12, 3)"/>       <!-- y=3，与上行差2 -->
+    <output a0="hint"/>
+</command>
+<element type="text" label="hint"><show object="true" label="false"/><objColor r="128" g="128" b="128"/><fontSize val="10"/></element>
+
+<!-- 图形区域（y≤2） -->
+<!-- ... 几何图形 ... -->
+```
+
+**间距速查表：**
+
+| 元素类型 | 最小间距 | 推荐间距 |
+|----------|----------|----------|
+| 题目行之间 | 1.5 | 2.0 |
+| 题目→答案 | 2.0 | 2.5 |
+| 答案→分析 | 1.5 | 2.0 |
+| 文本→图形 | 1.0 | 1.5 |
+| 滑块之间 | 1.0 | 1.5 |
+
+---
+
+### 0.2 图形方向与原图一致
+
+**核心原则：按原图方向设置坐标，不要旋转**
+
+```xml
+<!-- ====== 菱形示例：AC水平，BD竖直 ====== -->
+<!-- 原图方向：AC水平（左右），BD竖直（上下） -->
+
+<!-- 正确：保持原图方向 -->
+<element type="point" label="A"><coords x="-6.928" y="0" z="1"/></element>   <!-- 左 -->
+<element type="point" label="C"><coords x="6.928" y="0" z="1"/></element>    <!-- 右 -->
+<element type="point" label="B"><coords x="0" y="-4" z="1"/></element>      <!-- 下 -->
+<element type="point" label="D"><coords x="0" y="4" z="1"/></element>       <!-- 上 -->
+
+<!-- 错误：旋转90°，与原图不一致 -->
+<!-- <element type="point" label="A"><coords x="0" y="6.928" z="1"/></element> -->   <!-- ❌ 上 -->
+<!-- <element type="point" label="C"><coords x="0" y="-6.928" z="1"/></element> -->  <!-- ❌ 下 -->
+<!-- <element type="point" label="B"><coords x="-4" y="0" z="1"/></element> -->     <!-- ❌ 左 -->
+<!-- <element type="point" label="D"><coords x="4" y="0" z="1"/></element> -->      <!-- ❌ 右 -->
+```
+
+**方向检查清单：**
+
+| 检查项 | 原图特征 | 生成要求 |
+|--------|----------|----------|
+| 底边 | 水平放置 | A在左，B在右，y坐标相同 |
+| 对称轴 | 竖直/水平 | 保持相同方向 |
+| 顶点顺序 | 顺时针A→B→C→D | 按相同顺序定义坐标 |
+| 上下关系 | D在上，B在下 | y(D) > y(B) |
+
+---
+
 ## 模式1：参数滑块控制
 
 ### 1.1 一次函数 y=kx+b 参数控制
