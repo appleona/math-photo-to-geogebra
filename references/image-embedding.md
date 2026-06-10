@@ -1,6 +1,7 @@
 # 图片嵌入与图形校对
 
 > 📚 **相关文档：**
+> - [约束建模指南](constraint-guide.md) - 约束工具深度指南
 > - [题目理解指南](problem-analysis-guide.md) - 题目理解要点
 > - [动态演示模式](dynamic-demo-patterns.md) - XML模板
 > - [常见理解偏差](common-misunderstandings.md) - 偏差修正

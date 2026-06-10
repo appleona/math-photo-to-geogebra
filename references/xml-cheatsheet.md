@@ -1,14 +1,5 @@
 # GeoGebra XML 快速参考
 
-> 📚 **相关文档：**
-> - [题目理解指南](problem-analysis-guide.md) - 各题型理解要点
-> - [动态演示模式](dynamic-demo-patterns.md) - 完整XML模板
-> - [常见理解偏差](common-misunderstandings.md) - 常见错误避免
-> - [常见几何构造](common-patterns.md) - 几何构造模式
-> - [质量复查机制](quality-check.md) - 检查清单
-
-
-
 ## 核心原则
 
 **使用GeoGebra原生工具，不要手动计算！**
@@ -75,6 +66,38 @@
 </element>
 ```
 
+#### 点在直线上（用于延长线）
+
+```xml
+<command name="Line">
+    <input a0="A" a1="B"/>
+    <output a0="lineAB"/>
+</command>
+<element type="line" label="lineAB">
+    <show object="false" label="false"/>
+</element>
+
+<command name="Point">
+    <input a0="lineAB"/>       <!-- 约束到直线 -->
+    <input a1="1.5"/>          <!-- 参数：1=点B，0=点A，>1在B外侧 -->
+    <output a0="F"/>
+</command>
+```
+
+#### 点在圆上
+
+```xml
+<command name="Point">
+    <input a0="c1"/>           <!-- 约束到圆 -->
+    <input a1="0.3"/>          <!-- 参数：0~1对应圆周位置 -->
+    <output a0="P"/>
+</command>
+<element type="point" label="P">
+    <show object="true" label="true"/>
+    <objColor r="0" g="0" b="255" alpha="0"/>
+</element>
+```
+
 ---
 
 ### 线段
@@ -98,6 +121,11 @@
 - `type="0"`: 实线
 - `type="1"`: 虚线
 - `type="2"`: 点线
+
+粗细建议：
+- 普通边线：`thickness="2"`
+- 所求目标：`thickness="4"`
+- 辅助线：`thickness="1"` 或 `2` + 虚线
 
 ---
 
@@ -138,12 +166,24 @@
 ### 圆
 
 ```xml
+<!-- 圆心+半径 -->
 <command name="Circle">
-    <input a0="O" a1="3"/>  <!-- 圆心+半径 -->
+    <input a0="O"/>     <!-- 圆心 -->
+    <input a1="3"/>     <!-- 半径数值 -->
     <output a0="c1"/>
 </command>
+
+<!-- 圆心+圆上一点 -->
+<command name="Circle">
+    <input a0="O"/>     <!-- 圆心 -->
+    <input a1="A"/>     <!-- 圆上一点 -->
+    <output a0="c1"/>
+</command>
+
 <element type="conic" label="c1">
     <show object="true" label="false"/>
+    <objColor r="0" g="0" b="255" alpha="0"/>
+    <lineStyle thickness="2" type="0"/>
 </element>
 ```
 
@@ -152,13 +192,136 @@
 ### 角度
 
 ```xml
+<!-- ∠BAC -->
 <command name="Angle">
-    <input a0="B" a1="A" a2="C"/>  <!-- ∠BAC -->
+    <input a0="B" a1="A" a2="C"/>
     <output a0="alpha"/>
 </command>
 <element type="angle" label="alpha">
     <show object="true" label="true"/>
 </element>
+```
+
+---
+
+### 垂线
+
+```xml
+<command name="PerpendicularLine">
+    <input a0="C"/>         <!-- 经过的点 -->
+    <input a1="sideAB"/>    <!-- 垂直对象（线段/直线） -->
+    <output a0="perp"/>
+</command>
+<element type="line" label="perp">
+    <show object="true" label="false"/>
+    <lineStyle thickness="2" type="1"/>
+</element>
+```
+
+---
+
+### 平行线
+
+```xml
+<!-- 先定义参考线 -->
+<command name="Line">
+    <input a0="A" a1="B"/>
+    <output a0="lineAB"/>
+</command>
+
+<!-- 过C作AB的平行线 -->
+<command name="Line">
+    <input a0="C"/>
+    <input a1="lineAB"/>    <!-- 平行于lineAB -->
+    <output a0="parallel"/>
+</command>
+```
+
+---
+
+### 角平分线
+
+```xml
+<!-- ∠BAC的角平分线 -->
+<command name="AngleBisector">
+    <input a0="B" a1="A" a2="C"/>
+    <output a0="bisector"/>
+</command>
+<element type="line" label="bisector">
+    <show object="true" label="false"/>
+    <objColor r="0" g="128" b="0" alpha="0"/>
+    <lineStyle thickness="2" type="1"/>
+</element>
+```
+
+---
+
+### 切线
+
+```xml
+<!-- 过圆上一点A作切线 -->
+<command name="Tangent">
+    <input a0="A"/>
+    <input a1="c1"/>
+    <output a0="tangent"/>
+</command>
+
+<!-- 过圆外一点P作切线（两条） -->
+<command name="Tangent">
+    <input a0="P"/>
+    <input a1="c1"/>
+    <output a0="t1"/>
+    <output a0="t2"/>
+</command>
+```
+
+---
+
+### 交点
+
+```xml
+<!-- 两线交点 -->
+<command name="Intersect">
+    <input a0="line1" a1="line2"/>
+    <output a0="D"/>
+</command>
+
+<!-- 线与圆交点 -->
+<command name="Intersect">
+    <input a0="line1" a1="c1"/>
+    <output a0="E"/>
+    <output a0="F"/>
+</command>
+```
+
+---
+
+### 垂足
+
+```xml
+<!-- 方法一：PerpendicularLine + Intersect -->
+<command name="PerpendicularLine">
+    <input a0="C"/>
+    <input a1="sideAB"/>
+    <output a0="perp"/>
+</command>
+<command name="Intersect">
+    <input a0="perp" a1="sideAB"/>
+    <output a0="H"/>
+</command>
+```
+
+---
+
+## 函数图像
+
+```xml
+<element type="function" label="f">
+    <show object="true" label="true"/>
+    <objColor r="0" g="0" b="255" alpha="0"/>
+    <lineStyle thickness="2" type="0"/>
+</element>
+<expression label="f" exp="x^2-2*x-3" type="function"/>
 ```
 
 ---
@@ -180,6 +343,39 @@
     <fontSize val="12"/>
 </element>
 ```
+
+---
+
+## 图片嵌入
+
+```xml
+<command name="Image">
+    <input a0="&quot;data:image/png;base64,iVBORw0KGgo...&quot;"/>
+    <input a1="(-2, -8)"/>     <!-- 左下角坐标 -->
+    <input a2="(14, 0)"/>      <!-- 宽度向量 -->
+    <input a3="(0, 10)"/>      <!-- 高度向量 -->
+    <output a0="originalFigure"/>
+</command>
+<element type="image" label="originalFigure">
+    <show object="true" label="false"/>
+</element>
+```
+
+---
+
+## 颜色编码规范
+
+| 元素类型 | 颜色 (r,g,b) | 说明 |
+|----------|-------------|------|
+| 普通顶点 | (0,0,0) 黑色 | 默认点颜色 |
+| 动态点 | (0,0,255) 蓝色 | 可拖动的动点 |
+| 中点/特殊点 | (255,0,255) 紫色 | 中点、垂足等 |
+| 所求目标 | (255,0,0) 红色 | 需要求解的边/角 |
+| 辅助线 | (0,128,0) 绿色 | 延长线、辅助线 |
+| 函数图像 | (0,0,255) 蓝色 | 一次函数 |
+| 二次函数 | (255,0,0) 红色 | 二次函数 |
+| 圆 | (0,0,255) 蓝色 | 默认圆颜色 |
+| 切线 | (255,0,0) 红色 | 切线突出显示 |
 
 ---
 
@@ -226,6 +422,46 @@
 
 <!-- ✓ 正确 -->
 <input a0="&quot;题目内容ABCD...&quot;"/>
+```
+
+### 错误4：手动计算垂足坐标
+
+```xml
+<!-- ✗ 错误 -->
+<element type="point" label="H">
+    <coords x="2" y="1" z="1"/>  <!-- 手算投影 -->
+</element>
+
+<!-- ✓ 正确 -->
+<command name="PerpendicularLine">
+    <input a0="C"/>
+    <input a1="sideAB"/>
+    <output a0="perp"/>
+</command>
+<command name="Intersect">
+    <input a0="perp" a1="sideAB"/>
+    <output a0="H"/>
+</command>
+```
+
+### 错误5：手动计算平行线
+
+```xml
+<!-- ✗ 错误：通过斜率相同手动设点 -->
+<element type="point" label="D">
+    <coords x="5" y="2" z="1"/>  <!-- 假设斜率相同 -->
+</element>
+
+<!-- ✓ 正确：使用Line工具的平行模式 -->
+<command name="Line">
+    <input a0="A" a1="B"/>
+    <output a0="lineAB"/>
+</command>
+<command name="Line">
+    <input a0="C"/>
+    <input a1="lineAB"/>
+    <output a0="parallel"/>
+</command>
 ```
 
 ---
@@ -277,7 +513,7 @@
     <!-- OCR文本框 -->
     <command name="Text">
         <input a0="&quot;三角形ABC，求面积&quot;"/>
-        <input a1="(-2, 6)"/>
+        <input a0="(-2, 6)"/>
         <output a0="text1"/>
     </command>
     <element type="text" label="text1">
