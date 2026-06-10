@@ -6,7 +6,6 @@
 > - [常见几何构造](common-patterns.md) - 几何构造模式
 > - [XML快速参考](xml-cheatsheet.md) - XML语法速查
 > - [质量复查机制](quality-check.md) - 检查清单
-> - [图片嵌入](image-embedding.md) - 原图嵌入方法
 
 
 

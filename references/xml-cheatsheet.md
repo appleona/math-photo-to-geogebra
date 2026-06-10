@@ -346,23 +346,6 @@
 
 ---
 
-## 图片嵌入
-
-```xml
-<command name="Image">
-    <input a0="&quot;data:image/png;base64,iVBORw0KGgo...&quot;"/>
-    <input a1="(-2, -8)"/>     <!-- 左下角坐标 -->
-    <input a2="(14, 0)"/>      <!-- 宽度向量 -->
-    <input a3="(0, 10)"/>      <!-- 高度向量 -->
-    <output a0="originalFigure"/>
-</command>
-<element type="image" label="originalFigure">
-    <show object="true" label="false"/>
-</element>
-```
-
----
-
 ## 颜色编码规范
 
 | 元素类型 | 颜色 (r,g,b) | 说明 |

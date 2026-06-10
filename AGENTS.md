@@ -32,7 +32,7 @@ Use this skill when the user wants to:
 ```python
 # Essential tools in scripts/
 pack_ggb.py          # Pack XML to .ggb
-image_utils.py       # Process images
+pack_ggb.py          # Package XML into .ggb
 ```
 
 ## Workflow
@@ -107,7 +107,7 @@ Share Link to User
 4. **common-patterns.md** - Common geometry constructions
 5. **xml-cheatsheet.md** - Quick XML syntax reference
 6. **quality-check.md** - Verification checklist
-7. **image-embedding.md** - Image embedding limitations & alternatives (text preferred)
+7. **constraint-guide.md** - Constraint modeling deep guide
 
 ## Common Mistakes to Avoid
 
